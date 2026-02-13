@@ -12,6 +12,10 @@ import java.util.stream.Stream;
 public class ProjectScanner {
 
     public List<Path> scanProject(String projectPath) {
+        if (projectPath == null || projectPath.isEmpty()) {
+            throw new IllegalArgumentException("Project path cannot be null or empty");
+        }
+
         Path root = Paths.get(projectPath);
 
         if (!Files.exists(root)) {
@@ -23,7 +27,7 @@ public class ProjectScanner {
         try (Stream<Path> paths = Files.walk(root)) {
             return paths
                     .filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".java"))
+                    .filter(p -> p.toString().toLowerCase().endsWith(".java"))
                     .collect(Collectors.toList());
 
         } catch (IOException e) {
