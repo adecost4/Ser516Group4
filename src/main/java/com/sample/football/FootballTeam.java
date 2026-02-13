@@ -1,4 +1,4 @@
-package test.sample.football;
+package com.sample.football;
 
 // sample class for testing - private/public fields, methods, and constructors
 public class FootballTeam {
