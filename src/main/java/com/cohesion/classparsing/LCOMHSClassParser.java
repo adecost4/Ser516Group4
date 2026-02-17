@@ -2,7 +2,7 @@ package com.cohesion.classparsing;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
-public class ClassParser {
+public class LCOMHSClassParser {
     /*
     TODO: Task 17 extract methods + fields for each class
     both methods require a ClassOrInterfaceDeclaration as input, which can be found using StaticJavaParser.parse(file).getClassByName("ClassName").orElseThrow(() -> new RuntimeException("Class not found"))

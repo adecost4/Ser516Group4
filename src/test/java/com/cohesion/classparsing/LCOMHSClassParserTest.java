@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class ClassParserTest {
-    private final ClassParser parser = new ClassParser();
+public class LCOMHSClassParserTest {
+    private final LCOMHSClassParser parser = new LCOMHSClassParser();
     File footballClass = new File("src/main/java/com/sample/football/FootballTeam.java");
 
     @Test
