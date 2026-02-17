@@ -25,4 +25,18 @@ public class ClassParserTest {
         int count = parser.countClassMethods(cls);
         assert count == 12 : "Expected 12 methods and constructors, but got " + count;
     }
+
+    @Test
+    public void testCountClassInstanceFields() {
+
+        ClassOrInterfaceDeclaration cls = null;
+        try {
+            cls = StaticJavaParser.parse(footballClass).getClassByName("FootballTeam").orElseThrow(() -> new RuntimeException("Class not found"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int count = parser.contCountClassInstanceFields(cls);
+        assert count == 4 : "Expected 4 instance fields, but got " + count;
+    }
 }
