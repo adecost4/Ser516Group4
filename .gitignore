@@ -27,3 +27,6 @@ replay_pid*
 # ide specifc folders
 .vscode/
 .idea/
+
+# build folders
+target/
