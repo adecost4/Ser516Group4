@@ -1,6 +1,6 @@
 package com.cohesion;
 
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -21,5 +21,17 @@ public class Main {
         // System.out.println("Found " + javaFiles.size() + " Java files:");
 
         // javaFiles.forEach(System.out::println);
+
+        List<MetricRecord> records = new ArrayList<>();
+        records.add(new MetricRecord("com.sample.football", "FootballTeam", "LCOMHS", 0.214286, 1738890000L));
+        records.add(new MetricRecord("com.sample.football", "FootballTeam", "LCOM4", 3.0, 1738890000L));
+        records.add(new MetricRecord("com.sample.football", "Player", "LCOMHS", 0.500000, 1738890000L));
+        records.add(new MetricRecord("com.sample.football", "Player", "LCOM4", 2.0, 1738890000L));
+
+        System.out.println("\n=== JSON Output ===");
+        System.out.println(MetricFormatter.toJson(records));
+
+        System.out.println("\n=== Prometheus Output ===");
+        System.out.println(MetricFormatter.toPrometheus(records));
     }
 }
