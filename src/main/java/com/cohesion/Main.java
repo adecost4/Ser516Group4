@@ -26,14 +26,23 @@ public class Main {
         javaFiles.forEach(System.out::println);
         LCOMHSClassParser parser = new LCOMHSClassParser();
 
+        double sumOfFieldToMethods;
+        double lcomhs;
         for (Path file : javaFiles) {
             List<MFResult> results = parser.getMFForFile(file.toFile()); // Task 17
-
             for (MFResult r : results) {
+            // Value of US-3
+            sumOfFieldToMethods = 24.0;
+
+            // Compute LCOMHS
+            lcomhs = LcomhsCalculator.computeLcomhs(r.getM(), r.getF(), sumOfFieldToMethods);
+
+            
                 System.out.println("File: " + file.getFileName());
                 System.out.println("Class: " + r.getClassName());
                 System.out.println("M (methods+ctors): " + r.getM());
                 System.out.println("F (instance fields): " + r.getF());
+                System.out.printf("LCOMHS=%.6f%n", lcomhs);
                 System.out.println("----------------------------------");
             }
         }
