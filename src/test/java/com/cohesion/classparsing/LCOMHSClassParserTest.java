@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class LCOMHSClassParserTest {
+    static {
+        LCOMHSClassParser.configureSymbolSolver();
+    }
     private final LCOMHSClassParser parser = new LCOMHSClassParser();
     File footballClass = new File("src/main/java/com/sample/football/FootballTeam.java");
 

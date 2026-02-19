@@ -2,11 +2,13 @@ package com.cohesion.classparsing;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.cohesion.classes.MFResult;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.CallableDeclaration;
@@ -15,7 +17,12 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.resolution.TypeSolver;
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 
 
@@ -71,8 +78,8 @@ public class LCOMHSClassParser {
                         }
                     }
                 }
-                // check for field access like "this.fieldName"
-                else {
+                // check for field access like "this.fieldName" if the field hasn't already been accessed
+                if (!fieldAccessed) {
                     fieldAccessed = m.findAll(FieldAccessExpr.class, f -> f.getNameAsString().equals(fieldName)).size() > 0;
                 }
                 
@@ -88,6 +95,7 @@ public class LCOMHSClassParser {
     //task 17
     public List<MFResult> getMFForFile(File file) {
         try {
+            configureSymbolSolver();
             CompilationUnit cu = StaticJavaParser.parse(file);
 
             return cu.findAll(ClassOrInterfaceDeclaration.class)
@@ -104,5 +112,20 @@ public class LCOMHSClassParser {
         } catch (Exception e) {
             throw new RuntimeException("Error parsing file: " + file, e);
         }
+    }
+
+    public static void configureSymbolSolver() {
+        TypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
+
+        TypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Paths.get("src/main/java"));
+
+        CombinedTypeSolver combinedSolver = new CombinedTypeSolver();
+        combinedSolver.add(reflectionTypeSolver);
+        combinedSolver.add(javaParserTypeSolver);
+
+        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedSolver);
+        ParserConfiguration parserConfig = new ParserConfiguration();
+        parserConfig.setSymbolResolver(symbolSolver);
+        StaticJavaParser.setConfiguration(parserConfig);
     }
 }
