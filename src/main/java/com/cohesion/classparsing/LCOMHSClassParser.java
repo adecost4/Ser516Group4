@@ -1,16 +1,21 @@
 package com.cohesion.classparsing;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.cohesion.classes.MFResult;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 
 
@@ -36,31 +41,42 @@ public class LCOMHSClassParser {
                 .collect(Collectors.toList());;
         
         // Get all non-static methods
-        List<MethodDeclaration> methods = cls.getMethods().stream()
+        List<CallableDeclaration<?>> methods = cls.getMethods().stream()
                 .filter(m -> !m.isStatic()) // static methods can't access instance fields
                 .collect(Collectors.toList());
+
+        // Get all constructors
+        List<CallableDeclaration<?>> constructors = cls.getConstructors().stream()
+                .collect(Collectors.toList());
+
+        // Combine methods and constructors
+        List<CallableDeclaration<?>> methodsAndConstructors = Stream.concat(methods.stream(), constructors.stream()).collect(Collectors.toList());
 
         int sum = 0;
 
         for (VariableDeclarator field : fields) {
             String fieldName = field.getNameAsString();
-            for (MethodDeclaration method : methods) {
-                int calc = 1 + 1;
-            }
-        }
+            for (CallableDeclaration<?> m : methodsAndConstructors) {
+                boolean fieldAccessed = false;
 
-        for (MethodDeclaration method : methods) {
-            List<NameExpr> nameExprs = method.findAll(NameExpr.class); // variable access
-            List<FieldAccessExpr> fieldAccessExprs = method.findAll(FieldAccessExpr.class); // this.variable access
-
-            for (NameExpr nameExpr : nameExprs) {
-                if (fields.stream().anyMatch(f -> f.getNameAsString().equals(nameExpr.getNameAsString()))) {
-                    sum++;
+                // check for simple access
+                List<NameExpr> simpleFieldAccesses = m.findAll(NameExpr.class, f -> f.getNameAsString().equals(fieldName));
+                if (simpleFieldAccesses.size() > 0) {
+                    for (NameExpr var : simpleFieldAccesses) {
+                        // make sure the variable is actually the field and not a local variable with the same name
+                        ResolvedValueDeclaration resolvedVar = var.resolve();
+                        if (resolvedVar.isField()) {
+                            fieldAccessed = true;
+                            break;
+                        }
+                    }
                 }
-            }
-
-            for (FieldAccessExpr fieldAccessExpr : fieldAccessExprs) {
-                if (fields.stream().anyMatch(f -> f.getNameAsString().equals(fieldAccessExpr.getNameAsString()))) {
+                // check for field access like "this.fieldName"
+                else {
+                    fieldAccessed = m.findAll(FieldAccessExpr.class, f -> f.getNameAsString().equals(fieldName)).size() > 0;
+                }
+                
+                if (fieldAccessed) {
                     sum++;
                 }
             }
