@@ -4,11 +4,13 @@ public class MFResult {
     private final String className;
     private final int M;
     private final int F;
+    private final int SUMMF;
 
-    public MFResult(String className, int m, int f) {
+    public MFResult(String className, int m, int f, int mf) {
         this.className = className;
         this.M = m;
         this.F = f;
+        this.SUMMF = mf;
     }
 
     public String getClassName() {
@@ -21,5 +23,9 @@ public class MFResult {
 
     public int getF() {
         return F;
+    }
+
+    public int getSUMMF() {
+        return SUMMF;
     }
 }
