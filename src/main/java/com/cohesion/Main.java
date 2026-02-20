@@ -10,9 +10,9 @@ import com.cohesion.classparsing.LCOMHSClassParser;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println(
-                "if you wanna test the scanner run mvn clean package and \r\n" + //
-                        "java -cp target/Ser516Group4-1.0-SNAPSHOT.jar com.cohesion.Main <path to your java project>");
+        // System.out.println(
+        //         "if you wanna test the scanner run mvn clean package and \r\n" + //
+        //                 "java -cp target/Ser516Group4-1.0-SNAPSHOT.jar com.cohesion.Main <path to your java project>");
 
         if (args.length == 0) {
         System.out.println("Usage: java -cp <jar> com.cohesion.Main <path>");
