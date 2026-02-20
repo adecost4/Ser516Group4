@@ -1,0 +1,10 @@
+services:
+  lcomhs:
+    image: maven:3.9.6-eclipse-temurin-17
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: >
+      mvn -q clean compile exec:java
+      -Dexec.mainClass=com.cohesion.Main
+      -Dexec.args=src/main/java
