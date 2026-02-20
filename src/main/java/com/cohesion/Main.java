@@ -1,6 +1,7 @@
 package com.cohesion;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cohesion.classes.MFResult;
@@ -25,13 +26,17 @@ public class Main {
 
         javaFiles.forEach(System.out::println);
         LCOMHSClassParser parser = new LCOMHSClassParser();
+        List<MetricRecord> records = new ArrayList<>();
 
         double lcomhs;
         for (Path file : javaFiles) {
             List<MFResult> results = parser.getMFForFile(file.toFile()); // Task 17
             for (MFResult r : results) {
+
+            long timestamp=System.currentTimeMillis()/1000;
             // Compute LCOMHS
-            lcomhs = LCOMHSCalculator.computeLcomhs(r.getM(), r.getF(), r.getSUMMF());          
+            lcomhs = LCOMHSCalculator.computeLcomhs(r.getM(), r.getF(), r.getSUMMF());   
+            records.add(new MetricRecord(r.getPackageName(), r.getClassName(), "LCOMHS", lcomhs, timestamp));       
                 System.out.println("File: " + file.getFileName());
                 System.out.println("Class: " + r.getClassName());
                 System.out.println("M (methods+ctors): " + r.getM());
@@ -41,5 +46,10 @@ public class Main {
                 System.out.println("----------------------------------");
             }
         }
+        System.out.println("\n=== JSON Output ===");
+        System.out.println(MetricFormatter.toJson(records));
+
+        System.out.println("\n=== Prometheus Output ===");
+        System.out.println(MetricFormatter.toPrometheus(records));
     }
 }
