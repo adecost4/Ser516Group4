@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class LCOMHSClassParserTest {
+    static {
+        LCOMHSClassParser.configureSymbolSolver();
+    }
     private final LCOMHSClassParser parser = new LCOMHSClassParser();
     File footballClass = new File("src/main/java/com/sample/football/FootballTeam.java");
 
@@ -36,7 +39,21 @@ public class LCOMHSClassParserTest {
             e.printStackTrace();
         }
 
-        int count = parser.contCountClassInstanceFields(cls);
+        int count = parser.countCountClassInstanceFields(cls);
         assert count == 4 : "Expected 4 instance fields, but got " + count;
+    }
+
+    @Test
+    public void testCountSumOfMethodFieldAccesses() {
+
+        ClassOrInterfaceDeclaration cls = null;
+        try {
+            cls = StaticJavaParser.parse(footballClass).getClassByName("FootballTeam").orElseThrow(() -> new RuntimeException("Class not found"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int count = parser.countSumOfMethodFieldAccesses(cls);
+        assert count == 18 : "Expected 18 field accesses, but got " + count;
     }
 }
