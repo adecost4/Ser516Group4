@@ -18,13 +18,13 @@
       <artifactId>javaparser-symbol-solver-core</artifactId>
       <version>3.28.0</version>
     </dependency>
-    
+
     <!-- Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
     <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>6.1.0-M1</version>
-        <scope>test</scope>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.14.3</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
