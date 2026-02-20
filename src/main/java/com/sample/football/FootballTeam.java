@@ -35,11 +35,11 @@ public class FootballTeam {
     }
 
     public int getWins() {
-        return this.wins;
+        return wins;
     }
 
     public int getLosses() {
-        return this.losses;
+        return losses;
     }
 
     public void randomizeTeam() {

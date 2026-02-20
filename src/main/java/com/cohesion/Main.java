@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println(
-                "if you wanna test the scanner then uncomment the below lines and run mvn clean package and \r\n" + //
+                "if you wanna test the scanner run mvn clean package and \r\n" + //
                         "java -cp target/Ser516Group4-1.0-SNAPSHOT.jar com.cohesion.Main <path to your java project>");
 
         if (args.length == 0) {
@@ -26,14 +26,18 @@ public class Main {
         javaFiles.forEach(System.out::println);
         LCOMHSClassParser parser = new LCOMHSClassParser();
 
+        double lcomhs;
         for (Path file : javaFiles) {
             List<MFResult> results = parser.getMFForFile(file.toFile()); // Task 17
-
             for (MFResult r : results) {
+            // Compute LCOMHS
+            lcomhs = LCOMHSCalculator.computeLcomhs(r.getM(), r.getF(), r.getSUMMF());          
                 System.out.println("File: " + file.getFileName());
                 System.out.println("Class: " + r.getClassName());
                 System.out.println("M (methods+ctors): " + r.getM());
                 System.out.println("F (instance fields): " + r.getF());
+                System.out.println("MF: " + r.getSUMMF());
+                System.out.printf("LCOMHS=%.6f%n", lcomhs);
                 System.out.println("----------------------------------");
             }
         }
