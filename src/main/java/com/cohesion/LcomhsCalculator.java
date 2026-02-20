@@ -3,7 +3,7 @@ package com.cohesion;
 import java.util.Map;
 import java.util.Set;
 
-public class LcomhsCalculator {
+public class LCOMHSCalculator {
 
     /**
      * Computes LCOMHS using:
@@ -15,14 +15,14 @@ public class LcomhsCalculator {
      */
     public static double computeLcomhs(int methodsCount,
                                        int fieldsCount,
-                                        double sumOfFieldToMethods) {
+                                        int sumOfFieldToMethods) {
 
         // Acceptance criteria: handle edge cases safely
         if (fieldsCount <= 0 || methodsCount <= 1) {
             return 0.0;
         }
 
-        double avg = sumOfFieldToMethods / (double) fieldsCount;
+        double avg =  (double) sumOfFieldToMethods / (double) fieldsCount;
         double lcomhs = (methodsCount - avg) / (methodsCount - 1.0);
 
         // Defensive clamp to [0, 1]
