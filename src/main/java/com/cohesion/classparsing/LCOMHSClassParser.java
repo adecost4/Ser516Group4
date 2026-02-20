@@ -97,6 +97,10 @@ public class LCOMHSClassParser {
         try {
             configureSymbolSolver();
             CompilationUnit cu = StaticJavaParser.parse(file);
+            // Get package name safely
+            String packageName = cu.getPackageDeclaration()
+              .map(pd -> pd.getNameAsString())
+                .orElse("(default)");
 
             return cu.findAll(ClassOrInterfaceDeclaration.class)
                     .stream()
@@ -105,7 +109,7 @@ public class LCOMHSClassParser {
                         int m = countClassMethods(cls); // Task 15
                         int f = countCountClassInstanceFields(cls); // Task 16
                         int sumMF = countSumOfMethodFieldAccesses(cls); // Task 26
-                        return new MFResult(cls.getNameAsString(), m, f, sumMF);
+                        return new MFResult(packageName, cls.getNameAsString(), m, f, sumMF);
                     })
                     .toList();
 
