@@ -22,7 +22,7 @@ services:
     image: prom/prometheus:latest
     volumes:
       - prometheus-data:/prometheus
-      # - ./prometheus.yml:/etc/prometheus/prometheus.yml TODO: uncomment this when prometheus.yml is made from Task 66
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 
