@@ -11,7 +11,8 @@ This project computes LCOMHS (Henderson–Sellers cohesion) per Java class and o
 
 ## ----------------------------
 ## 1. Run with Docker Compose
-docker compose up --build
+docker compose up -d prometheus grafana
+docker compose up --build lcomhs
 
 ## 2. Run with Docker - Build the image + Run
 docker build -t lcomhs-metrics .

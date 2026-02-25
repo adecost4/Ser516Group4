@@ -8,3 +8,24 @@ services:
       mvn -q clean compile exec:java
       -Dexec.mainClass=com.cohesion.Main
       -Dexec.args=src/main/java
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - prometheus-data:/prometheus
+      # - ./prometheus.yml:/etc/prometheus/prometheus.yml TODO: uncomment this when prometheus.yml is made from Task 66
+    ports:
+      - "9090:9090"
+
+volumes:
+  prometheus-data:
+  grafana-data:
