@@ -19,7 +19,7 @@ public class MetricsServer {
     public static final Gauge LCOMHS_GAUGE = Gauge.build()
             .name("lcomhs")
             .help("LCOMHS cohesion metric per Java class")
-            .labelNames("class", "package", "metric")
+            .labelNames("class", "package")
             .register(registry);
 
     private HttpServer server;

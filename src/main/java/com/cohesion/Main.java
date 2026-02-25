@@ -36,7 +36,7 @@ public class Main {
             // Compute LCOMHS
             lcomhs = LCOMHSCalculator.computeLcomhs(r.getM(), r.getF(), r.getSUMMF());
             MetricsServer.LCOMHS_GAUGE
-            .labels(r.getClassName(), r.getPackageName(), "LCOMHS")
+            .labels(r.getClassName(), r.getPackageName())
             .set(lcomhs);
             }
         }
