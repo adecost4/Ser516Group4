@@ -4,6 +4,8 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
+    ports:
+      - "8080:8080"
     command: >
       mvn -q clean compile exec:java
       -Dexec.mainClass=com.cohesion.Main
@@ -22,7 +24,7 @@ services:
     image: prom/prometheus:latest
     volumes:
       - prometheus-data:/prometheus
-      # - ./prometheus.yml:/etc/prometheus/prometheus.yml TODO: uncomment this when prometheus.yml is made from Task 66
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 
