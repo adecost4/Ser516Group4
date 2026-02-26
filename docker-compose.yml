@@ -4,6 +4,8 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
+    ports:
+      - "8080:8080"
     command: >
       mvn -q clean compile exec:java
       -Dexec.mainClass=com.cohesion.Main

@@ -16,7 +16,7 @@ docker compose up --build lcomhs
 
 ## 2. Run with Docker - Build the image + Run
 docker build -t lcomhs-metrics .
-docker run --rm lcomhs-metrics
+docker run --rm -p 8080:8080 lcomhs-metrics
 
 ## 3. Run Locally (Maven)
 mvn -q clean compile exec:java "-Dexec.mainClass=com.cohesion.Main" "-Dexec.args=src/main/java"
