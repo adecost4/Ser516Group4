@@ -51,5 +51,7 @@ public class Main {
 
         System.out.println("\n=== Prometheus Output ===");
         System.out.println(MetricFormatter.toPrometheus(records));
+
+        // Please print results of Takt Time here
     }
 }
