@@ -40,5 +40,12 @@ public class Main {
             .set(lcomhs);
             }
         }
+        System.out.println("\n=== JSON Output ===");
+        System.out.println(MetricFormatter.toJson(records));
+
+        System.out.println("\n=== Prometheus Output ===");
+        System.out.println(MetricFormatter.toPrometheus(records));
+
+        // Please print results of Takt Time here
     }
 }
