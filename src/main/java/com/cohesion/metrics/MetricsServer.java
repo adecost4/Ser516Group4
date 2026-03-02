@@ -14,38 +14,42 @@ import java.util.Collections;
 
 public class MetricsServer {
 
-    private static final CollectorRegistry registry = CollectorRegistry.defaultRegistry;
+private static final CollectorRegistry registry = CollectorRegistry.defaultRegistry;
 
-    public static final Gauge LCOMHS_GAUGE = Gauge.build()
-            .name("lcomhs")
-            .help("LCOMHS cohesion metric per Java class")
-            .labelNames("class", "package")
-            .register(registry);
+public static final Gauge LCOMHS_GAUGE = Gauge.build()
+.name("lcomhs")
+.help("LCOMHS cohesion metric per Java class")
+.labelNames("class", "package")
+.register(registry);
+public static final Gauge TAKT_TIME_GAUGE = Gauge.build()
+.name("takt_time_days_per_story")
+.help("Daily Takt Time = 1 working day / stories delivered that day (from Taiga finish_date)")
+.labelNames("sprint", "date")
+.register();
+private HttpServer server;
 
-    private HttpServer server;
+public void start(int port) throws IOException {
+server = HttpServer.create(new InetSocketAddress(port), 0);
 
-    public void start(int port) throws IOException {
-        server = HttpServer.create(new InetSocketAddress(port), 0);
+server.createContext("/metrics/lcomhs", exchange -> {
+exchange.getResponseHeaders().set("Content-Type", TextFormat.CONTENT_TYPE_004);
+exchange.sendResponseHeaders(200, 0);
 
-        server.createContext("/metrics/lcomhs", exchange -> {
-            exchange.getResponseHeaders().set("Content-Type", TextFormat.CONTENT_TYPE_004);
-            exchange.sendResponseHeaders(200, 0);
+try (Writer writer = new OutputStreamWriter(exchange.getResponseBody(), StandardCharsets.UTF_8)) {
+TextFormat.write004(writer,
+registry.filteredMetricFamilySamples(Collections.singleton("lcomhs")));
+}
 
-            try (Writer writer = new OutputStreamWriter(exchange.getResponseBody(), StandardCharsets.UTF_8)) {
-                TextFormat.write004(writer,
-                        registry.filteredMetricFamilySamples(Collections.singleton("lcomhs")));
-            }
+exchange.close();
+});
 
-            exchange.close();
-        });
+server.start();
+System.out.println("LCOMHS Metrics running at http://localhost:" + port + "/metrics/lcomhs");
+}
 
-        server.start();
-        System.out.println("LCOMHS Metrics running at http://localhost:" + port + "/metrics/lcomhs");
-    }
-
-    public void stop() {
-        if (server != null) {
-            server.stop(0);
-        }
-    }
+public void stop() {
+if (server != null) {
+server.stop(0);
+}
+}
 }

@@ -1,15 +1,11 @@
-# Use Maven with a JDK (choose 17 unless your project requires another)
 FROM maven:3.9.6-eclipse-temurin-17
-
 WORKDIR /app
 
-# Copy pom first to leverage Docker layer caching
+COPY swent0linux_asu.pem /tmp/swent0linux_asu.pem
+RUN keytool -importcert -noprompt -cacerts -storepass changeit -alias swent0linux_asu -file /tmp/swent0linux_asu.pem
+
 COPY pom.xml .
-
-# Download dependencies (speeds up rebuilds)
 RUN mvn -q -DskipTests dependency:go-offline
-
-# Copy source
 COPY src ./src
 
 # Default command
