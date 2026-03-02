@@ -3,13 +3,18 @@ package com.TaigaAPI;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.net.http.*;
 import java.time.Duration;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 public class TaigaApiClient {
 
@@ -18,20 +23,48 @@ public class TaigaApiClient {
             "https://swent0linux.asu.edu/taiga/api/v1"
     );
 
+    private final boolean insecureSsl = "true".equalsIgnoreCase(
+            System.getenv().getOrDefault("TAIGA_INSECURE_SSL", "false")
+    );
+
     private final HttpClient client;
     private final ObjectMapper mapper;
 
     private String authToken;
 
     public TaigaApiClient() {
-        this.client = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)                
-                .connectTimeout(Duration.ofSeconds(5))                
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
-
+        this.client = buildHttpClient();
         this.mapper = new ObjectMapper();
         System.out.println("[TaigaApiClient] Using base URL: " + base);
+        System.out.println("[TaigaApiClient] Insecure SSL: " + insecureSsl);
+    }
+
+    private HttpClient buildHttpClient() {
+        HttpClient.Builder b = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(5))
+                .followRedirects(HttpClient.Redirect.NORMAL);
+
+        if (!insecureSsl) {
+            return b.build();
+        }
+
+        try {
+            TrustManager[] trustAll = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                        @Override public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        @Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    }
+            };
+
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAll, new SecureRandom());
+
+            return b.sslContext(sc).build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create insecure SSL HttpClient", e);
+        }
     }
 
     public void login(String username, String password) {
@@ -48,7 +81,7 @@ public class TaigaApiClient {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(8)) // request timeout
+                .timeout(Duration.ofSeconds(8))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
