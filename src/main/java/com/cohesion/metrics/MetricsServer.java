@@ -43,8 +43,21 @@ registry.filteredMetricFamilySamples(Collections.singleton("lcomhs")));
 exchange.close();
 });
 
+server.createContext("/metrics/takt-time", exchange -> {
+exchange.getResponseHeaders().set("Content-Type", TextFormat.CONTENT_TYPE_004);
+exchange.sendResponseHeaders(200, 0);
+
+try (Writer writer = new OutputStreamWriter(exchange.getResponseBody(), StandardCharsets.UTF_8)) {
+TextFormat.write004(writer,
+registry.filteredMetricFamilySamples(Collections.singleton("takt_time_days_per_story")));
+}
+
+exchange.close();
+});
+
 server.start();
 System.out.println("LCOMHS Metrics running at http://localhost:" + port + "/metrics/lcomhs");
+System.out.println("Takt Time Metrics running at http://localhost:" + port + "/metrics/takt-time");
 }
 
 public void stop() {
