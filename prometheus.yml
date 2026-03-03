@@ -7,3 +7,8 @@ scrape_configs:
     static_configs:
       - targets: ['lcomhs:8080']
     metrics_path: '/metrics/lcomhs'
+  
+  - job_name: 'takt-time'
+    static_configs:
+      - targets: ['lcomhs:8080']
+    metrics_path: '/metrics/takt-time'
