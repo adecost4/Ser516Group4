@@ -14,12 +14,6 @@ import java.util.Optional;
 
 public class LeadTimeCalculatorTest {
     
-    /*
-     * A minimal stub implementation of HttpResponse<String> that returns a
-     * predefined body. Other methods either return defaults or throw
-     * UnsupportedOperationException since they are not needed by
-     * LeadTimeCalculator.calculateLeadTime.
-     */
     private static class StubResponse implements HttpResponse<String> {
         private final String body;
 
@@ -71,7 +65,7 @@ public class LeadTimeCalculatorTest {
     @Test
     public void validClosedStoryReturnsDays() {
         String json = "{\"created_date\":\"2024-01-01T00:00:00Z\"," +
-                      "\"finished_date\":\"2024-01-11T00:00:00Z\"," +
+                      "\"finish_date\":\"2024-01-11T00:00:00Z\"," +
                       "\"is_closed\":true}";
         int leadTime = LeadTimeCalculator.calculateLeadTime(new StubResponse(json));
         assertEquals(10, leadTime, "Should compute ten days between the two timestamps");
@@ -80,7 +74,7 @@ public class LeadTimeCalculatorTest {
     @Test
     public void openStoryReturnsMinusOne() {
         String json = "{\"created_date\":\"2024-01-01T00:00:00Z\"," +
-                      "\"finished_date\":\"2024-01-11T00:00:00Z\"," +
+                      "\"finish_date\":\"2024-01-11T00:00:00Z\"," +
                       "\"is_closed\":false}";
         int leadTime = LeadTimeCalculator.calculateLeadTime(new StubResponse(json));
         assertEquals(-1, leadTime, "Open stories should return -1");
@@ -95,7 +89,7 @@ public class LeadTimeCalculatorTest {
     @Test
     public void sameDayClosedReturnsZero() {
         String json = "{\"created_date\":\"2024-02-14T08:00:00Z\"," +
-                      "\"finished_date\":\"2024-02-14T20:00:00Z\"," +
+                      "\"finish_date\":\"2024-02-14T20:00:00Z\"," +
                       "\"is_closed\":true}";
         int leadTime = LeadTimeCalculator.calculateLeadTime(new StubResponse(json));
         assertEquals(0, leadTime, "Stories finished the same day should yield 0 lead time");
