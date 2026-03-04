@@ -1,17 +1,25 @@
 pipeline {
   agent any
 
-  tools {
-    maven 'Maven_3'
-  }
-
   stages {
-    stage('Checkout') { steps { checkout scm } }
+    stage('Checkout') {
+      steps { checkout scm }
+    }
 
-    stage('Unit Tests') {
-      steps { sh 'mvn -B -ntp test' }
+    stage('Unit Tests (Docker Maven)') {
+      steps {
+        sh '''
+          docker run --rm \
+            -v "$PWD":/app \
+            -w /app \
+            maven:3.9.6-eclipse-temurin-17 \
+            mvn -B -ntp test
+        '''
+      }
       post {
-        always { junit '**/target/surefire-reports/*.xml' }
+        always {
+          junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+        }
       }
     }
   }
