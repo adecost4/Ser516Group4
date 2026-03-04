@@ -2,12 +2,14 @@ package com.cohesion;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import com.TaigaAPI.TaigaApiClient;
 import com.cohesion.classparsing.LCOMHSClassParser;
 import com.cohesion.classes.MFResult;
 import com.cohesion.metrics.MetricsServer;
 import com.cohesion.metrics.TaktTimeCalculator;
+import com.leadtime.LeadTimeRetriever;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class Main {
@@ -101,6 +103,11 @@ public class Main {
                 System.out.println("[Main] Non-zero Takt days published: " + publishedCount);
                
                 System.out.println("[Main] Takt metrics published.");
+
+                List<Integer> closedUserStoryIds = taiga.getClosedUserStoryIds();
+                Map<String, Integer> leadTimes = LeadTimeRetriever.getLeadTimeInfo(taiga, closedUserStoryIds); // TODO: Expose  in Task 50
+                System.out.println("[Main] Lead time info retrieved for " + leadTimes.size() + " closed user stories.");
+                leadTimes.forEach((name, time) -> System.out.println("[Main] Story: " + name + ", Lead Time: " + time)); // TODO: Remove when task 50 is done?
             }
             System.out.println("[Main] Running. Metrics available on :8080. Ctrl+C to stop.");
             Thread.currentThread().join();

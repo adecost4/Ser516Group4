@@ -15,6 +15,8 @@ import java.net.http.*;
 import java.time.Duration;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TaigaApiClient {
 
@@ -155,6 +157,10 @@ public class TaigaApiClient {
         return mapper.readTree(response.body());
     }
 
+    public HttpResponse<String> sendGetRawHttpResponse(String url) throws IOException, InterruptedException {
+        return client.send(buildGet(url), HttpResponse.BodyHandlers.ofString());
+    }
+
     public JsonNode getProjectBySlug(String slug) throws IOException, InterruptedException {
         String encoded = URLEncoder.encode(slug, StandardCharsets.UTF_8);
         return sendGetJson(base + "/projects/by_slug?slug=" + encoded, "getProjectBySlug");
@@ -166,5 +172,24 @@ public class TaigaApiClient {
 
     public JsonNode getMilestone(long milestoneId) throws IOException, InterruptedException {
         return sendGetJson(base + "/milestones/" + milestoneId, "getMilestone");
+    }
+
+    // get list of all user story ids
+    public List<Integer> getClosedUserStoryIds() throws IOException, InterruptedException {
+        JsonNode arr = sendGetJson(base + "/userstories", "getUserStories");
+        List<Integer> ids = new ArrayList<>();
+        if (arr != null && arr.isArray()) {
+            for (JsonNode obj : arr) {
+                if (obj.has("id") && obj.get("id").canConvertToInt() &&
+                        obj.has("is_closed") && obj.get("is_closed").asBoolean()) {
+                    ids.add(obj.get("id").asInt());
+                }
+            }
+        }
+        return ids;
+    }
+
+    public String getBase() {
+        return base;
     }
 }
