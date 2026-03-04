@@ -76,13 +76,8 @@ public class Main {
                 JsonNode milestone = taiga.getMilestone(milestoneId);
 
                 String sprintName = milestone.get("name").asText();
-                System.out.println("[Main] Chosen sprint: " + sprintName);
-
                 var points = TaktTimeCalculator.computeDaily(milestone);
-                System.out.println("[Main] Takt Time computed for " + points.size() + " working days.");
-
                 int publishedCount = 0;
-
                 for (TaktTimeCalculator.TaktPoint p : points) {
                     if (p.getDelivered() > 0) {
 
@@ -100,14 +95,11 @@ public class Main {
                     }
                 }
 
-                System.out.println("[Main] Non-zero Takt days published: " + publishedCount);
-               
-                System.out.println("[Main] Takt metrics published.");
-
                 List<Integer> closedUserStoryIds = taiga.getClosedUserStoryIds();
                 Map<String, Integer> leadTimes = LeadTimeRetriever.getLeadTimeInfo(taiga, closedUserStoryIds); // TODO: Expose  in Task 50
-                System.out.println("[Main] Lead time info retrieved for " + leadTimes.size() + " closed user stories.");
-                leadTimes.forEach((name, time) -> System.out.println("[Main] Story: " + name + ", Lead Time: " + time)); // TODO: Remove when task 50 is done?
+                leadTimes.forEach((name, time) -> {
+                    MetricsServer.LEAD_TIME_GAUGE.labels(name).set(time);
+                });
             }
             System.out.println("[Main] Running. Metrics available on :8080. Ctrl+C to stop.");
             Thread.currentThread().join();
