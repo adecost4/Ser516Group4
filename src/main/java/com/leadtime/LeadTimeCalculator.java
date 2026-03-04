@@ -1,5 +1,6 @@
 package com.leadtime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -29,11 +30,12 @@ public class LeadTimeCalculator {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static class UserStory {
         @JsonProperty("created_date")
         OffsetDateTime createdDate;
 
-        @JsonProperty("finished_date")
+        @JsonProperty("finish_date")
         OffsetDateTime finishedDate;
 
         @JsonProperty("is_closed")
