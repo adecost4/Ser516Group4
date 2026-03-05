@@ -21,6 +21,9 @@ docker run --rm -p 8080:8080 lcomhs-metrics
 ## 3. Run Locally (Maven)
 mvn -q clean compile exec:java "-Dexec.mainClass=com.cohesion.Main" "-Dexec.args=src/main/java"
 
+## Unit Tests
+Run unit tests locally (Maven)
+mvn -B -ntp test
 
 ## Project Structure (important paths)
 Source code: `src/main/java`
