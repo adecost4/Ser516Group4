@@ -12,3 +12,8 @@ scrape_configs:
     static_configs:
       - targets: ['lcomhs:8080']
     metrics_path: '/metrics/takt-time'
+
+  - job_name: 'leadtime'
+    static_configs:
+      - targets: ['lcomhs:8080']
+    metrics_path: '/metrics/leadtime'
