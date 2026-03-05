@@ -20,6 +20,11 @@ pipeline {
         always {
           junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
           archiveArtifacts artifacts: 'target/site/jacoco/**', allowEmptyArchive: true
+          jacoco(
+            execPattern: '**/target/jacoco.exec',
+            classPattern: '**/target/classes',
+            sourcePattern: '**/src/main/java'
+          )
         }
       }
     }
