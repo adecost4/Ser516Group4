@@ -7,6 +7,8 @@ This project computes:
 4. The metrics are exported to Prometheus and visualized using Grafana.
 5. Jenkins is used for continuous integration by running unit tests and generating code coverage reports.
 
+The team's quality is located [here](https://canvas.asu.edu/groups/754887/pages/group-4-quality-policy)
+
 ## Execution of the Project
 ### Metrics Exceution with Docker
 ### Stage 1: Prerequisites
