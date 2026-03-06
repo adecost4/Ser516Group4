@@ -9,8 +9,8 @@ services:
       - "8080:8080"
     environment:
       TAIGA_BASE_URL: https://swent0linux.asu.edu/taiga/api/v1
-      TAIGA_USERNAME: 
-      TAIGA_PASSWORD: 
+      TAIGA_USERNAME: # your username here
+      TAIGA_PASSWORD: # your password here
       TAIGA_PROJECT_SLUG: group-4
       TAIGA_SPRINT_INDEX: "1"
       TAIGA_INSECURE_SSL: "true"

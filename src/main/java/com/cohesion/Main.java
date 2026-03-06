@@ -2,12 +2,14 @@ package com.cohesion;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import com.TaigaAPI.TaigaApiClient;
 import com.cohesion.classparsing.LCOMHSClassParser;
 import com.cohesion.classes.MFResult;
 import com.cohesion.metrics.MetricsServer;
 import com.cohesion.metrics.TaktTimeCalculator;
+import com.leadtime.LeadTimeRetriever;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class Main {
@@ -74,13 +76,8 @@ public class Main {
                 JsonNode milestone = taiga.getMilestone(milestoneId);
 
                 String sprintName = milestone.get("name").asText();
-                System.out.println("[Main] Chosen sprint: " + sprintName);
-
                 var points = TaktTimeCalculator.computeDaily(milestone);
-                System.out.println("[Main] Takt Time computed for " + points.size() + " working days.");
-
                 int publishedCount = 0;
-
                 for (TaktTimeCalculator.TaktPoint p : points) {
                     if (p.getDelivered() > 0) {
 
@@ -98,9 +95,11 @@ public class Main {
                     }
                 }
 
-                System.out.println("[Main] Non-zero Takt days published: " + publishedCount);
-               
-                System.out.println("[Main] Takt metrics published.");
+                List<Integer> closedUserStoryIds = taiga.getClosedUserStoryIds();
+                Map<String, Integer> leadTimes = LeadTimeRetriever.getLeadTimeInfo(taiga, closedUserStoryIds); // TODO: Expose  in Task 50
+                leadTimes.forEach((name, time) -> {
+                    MetricsServer.LEAD_TIME_GAUGE.labels(name).set(time);
+                });
             }
             System.out.println("[Main] Running. Metrics available on :8080. Ctrl+C to stop.");
             Thread.currentThread().join();
