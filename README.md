@@ -1,6 +1,8 @@
 # Cohesion Analyzer (LCOMHS)
 This project computes LCOMHS (Henderson–Sellers cohesion) per Java class and output results with metadata (package, class, metric, timestamp).
 
+The team's quality is located [here](https://canvas.asu.edu/groups/754887/pages/group-4-quality-policy)
+
 ## Execution of the Project
 ## Prerequisites
 ## Local Run
