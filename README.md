@@ -1,84 +1,107 @@
-# Cohesion Analyzer (LCOMHS)
-This project computes LCOMHS (Henderson–Sellers cohesion) per Java class and output results with metadata (package, class, metric, timestamp).
+# LCOMHS + Takt Time + Lead Time + Grafana + Jenkins
+## Overview
+This project computes:
+1. LCOMHS (Henderson–Sellers cohesion) per Java class
+2. Lead Time from Taiga
+3. Takt Time from Taiga
+4. The metrics are exported to Prometheus and visualized using Grafana.
+5. Jenkins is used for continuous integration by running unit tests and generating code coverage reports.
 
 The team's quality is located [here](https://canvas.asu.edu/groups/754887/pages/group-4-quality-policy)
 
 ## Execution of the Project
-## Prerequisites
-## Local Run
-- Java 17
-- Maven 3.9+
-## Docker Run
-- Docker Desktop (or Docker Engine)
+### Metrics Exceution with Docker
+### Stage 1: Prerequisites
+1. Install Docker Desktop (or Docker Engine).
+2. Set Taiga credentials in the docker-compose.yml file.
+    - Update the following fields with your Taiga username and password:
+    - TAIGA_USERNAME: username
+    - TAIGA_PASSWORD: password
+
+### Stage 2: Run using Docker Compose
+Run the following command:
+- docker compose up --build
+
+This will start:
+- The metrics service
+- Prometheus
+- Grafana
 
 ## ----------------------------
-## 1. Run with Docker Compose
-docker compose up -d prometheus grafana
-docker compose up --build lcomhs
 
-## 2. Run with Docker - Build the image + Run
-docker build -t lcomhs-metrics .
-docker run --rm -p 8080:8080 lcomhs-metrics
+### Stage 3: Grafana Dashboard for Metrics
+(Metrics: LCOMHS, Takt Time, Lead Time)
 
-## 3. Run Locally (Maven)
-mvn -q clean compile exec:java "-Dexec.mainClass=com.cohesion.Main" "-Dexec.args=src/main/java"
+After running Docker compose,
+### Prometheus
+Promethemus will run at: http://localhost:9090/
+- To validate that metrics are available, run the following queries separately:
+1. lcomhs 
+2. takt_time_days_per_story
+3. lead_time
+- You should see results for each query.
 
-## Unit Tests
-Run unit tests locally  (Maven)
-mvn -B -ntp test
+### Grafana
+Grafana will run at: http://localhost:3000/
 
-## Project Structure (important paths)
-Source code: `src/main/java`
-Sample files: `src/main/java/com/sample/...` (example: `FootballTeam.java`)
-Main entry point: `com.cohesion.Main`
+login credientials: 
+- Username: admin
+- Password: admin
 
-## Output:
-Found 6 Java files:
-src\main\java\com\cohesion\classes\MFResult.java
-src\main\java\com\cohesion\classparsing\LCOMHSClassParser.java
-src\main\java\com\cohesion\LCOMHSCalculator.java
-src\main\java\com\cohesion\Main.java
-src\main\java\com\cohesion\ProjectScanner.java
-src\main\java\com\sample\football\FootballTeam.java
-File: MFResult.java
-Class: MFResult     
-M (methods+ctors): 5
-F (instance fields): 4
-MF: 8
-LCOMHS=0.750000
-----------------------------------
-File: LCOMHSClassParser.java
-Class: LCOMHSClassParser
-M (methods+ctors): 5
-F (instance fields): 0
-MF: 0
-LCOMHS=0.000000
-----------------------------------
-File: LCOMHSCalculator.java
-Class: LCOMHSCalculator
-M (methods+ctors): 1
-F (instance fields): 0
-MF: 0
-LCOMHS=0.000000
-----------------------------------
-File: Main.java
-Class: Main
-M (methods+ctors): 1
-F (instance fields): 0
-MF: 0
-LCOMHS=0.000000
-----------------------------------
-File: ProjectScanner.java
-Class: ProjectScanner
-M (methods+ctors): 2
-F (instance fields): 0
-MF: 0
-LCOMHS=0.000000
-----------------------------------
-File: FootballTeam.java
-Class: FootballTeam
-M (methods+ctors): 12
-F (instance fields): 4
-MF: 18
-LCOMHS=0.681818
-----------------------------------
+Step 1: Configure Data Source 
+1. Go to Connections -> Data Sources
+2. Add a new data source
+3. Select Prometheus
+4. Set:
+    - Name: prometheus
+    - Server URL: http://host.docker.internal:9090
+
+Step 2: Save and Test
+- Scroll down and click:
+    - "Save & Test"
+- You should see a success message.
+
+Step 3: Verify Data Source
+1. Go to Explore
+2. Select prometheus as the data source
+3. Run the following queries:
+    - lcomhs/ takt_time_days_per_story/ lead_time
+- You should see results returned.
+
+Step 4: Import Dashboard
+1. Go to Dashboards -> New -> Import
+2. Import the JSON file located at the root(Github repo): LCOMHS_Metric_Dashboard.json
+- The dashboard will display three panels for LCOMHS, Takt Time, Lead Time.
+## ----------------------------
+
+### Stage 4: Jenkins – View Unit Test and Coverage Reports
+Pipeline Name: unit-tests-group4
+
+Configurations(Already configured-no changes needed): 
+- Poll SCM: * * * * * (polls every minute)
+- SCM: Git
+- Git Repo: https://github.com/adecost4/Ser516Group4
+- Branch Specifier: */main 
+- (For development, change the branch name accordingly. In the future, this can be configured for any branch.).
+- Script Path: Jenkinsfile
+
+Coverage Threshold
+- Current Threshold: 10% (To be improved in future)
+
+Viewing Coverage Reports in Jenkins:
+1. Go to the Jenkins job.
+2. Open a build (click on build No.).
+3. Navigate to: Build Artifacts.
+4. Download all artifacts as a ZIP file.
+5. Open target/site/jacoco/index.html
+- This file contains the detailed coverage report.
+
+
+#### Optional - If unit testing locally
+To run tests and validate coverage locally:
+-    mvn clean verify
+- The console will display: Unit test results, Coverage validation, Build success/failure.
+
+The coverage report will be generated at:
+-    target/site/jacoco/index.html
+## ----------------------------
