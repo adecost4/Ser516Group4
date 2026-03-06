@@ -5,7 +5,7 @@ This project computes:
 2. Lead Time from Taiga
 3. Takt Time from Taiga
 4. The metrics are exported to Prometheus and visualized using Grafana.
-5. Jenkins is used to automate Test-Driven Development (TDD) by running unit tests and generating code coverage reports.
+5. Jenkins is used for continuous integration by running unit tests and generating code coverage reports.
 
 ## Execution of the Project
 ### Metrics Exceution with Docker
