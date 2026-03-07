@@ -1,55 +1,110 @@
 package com.cohesion;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import com.cohesion.classes.MFResult;
+import com.TaigaAPI.TaigaApiClient;
 import com.cohesion.classparsing.LCOMHSClassParser;
+import com.cohesion.classes.MFResult;
+import com.cohesion.metrics.MetricsServer;
+import com.cohesion.metrics.TaktTimeCalculator;
+import com.leadtime.LeadTimeRetriever;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class Main {
 
+    private static String env(String key) {
+        String v = System.getenv(key);
+        return (v == null || v.isBlank()) ? null : v.trim();
+    }
+
     public static void main(String[] args) {
-        // System.out.println(
-        //         "if you wanna test the scanner run mvn clean package and \r\n" + //
-        //                 "java -cp target/Ser516Group4-1.0-SNAPSHOT.jar com.cohesion.Main <path to your java project>");
+        try {
+            MetricsServer metricsServer = new MetricsServer();
+            metricsServer.start(8080);
+            System.out.println("[Main] Metrics server started on :8080");
 
-        if (args.length == 0) {
-        System.out.println("Usage: java -cp <jar> com.cohesion.Main <path>");
-        return;
-        }
+            if (args != null && args.length > 0 && args[0] != null && !args[0].isBlank()) {
+                String projectPath = args[0].trim();
+                System.out.println("[Main] Running LCOMHS scan on path: " + projectPath);
 
-        ProjectScanner scanner = new ProjectScanner();
-        List<Path> javaFiles = scanner.scanProject(args[0]);
+                ProjectScanner scanner = new ProjectScanner();
+                List<Path> javaFiles = scanner.scanProject(projectPath);
 
-        System.out.println("Found " + javaFiles.size() + " Java files:");
+                LCOMHSClassParser parser = new LCOMHSClassParser();
 
-        javaFiles.forEach(System.out::println);
-        LCOMHSClassParser parser = new LCOMHSClassParser();
-        List<MetricRecord> records = new ArrayList<>();
+                for (Path file : javaFiles) {
+                    List<MFResult> results = parser.getMFForFile(file.toFile());
+                    for (MFResult r : results) {
+                        double lcomhs = LCOMHSCalculator.computeLcomhs(r.getM(), r.getF(), r.getSUMMF());
+                        MetricsServer.LCOMHS_GAUGE.labels(r.getClassName(), r.getPackageName()).set(lcomhs);
+                    }
+                }
 
-        double lcomhs;
-        for (Path file : javaFiles) {
-            List<MFResult> results = parser.getMFForFile(file.toFile()); // Task 17
-            for (MFResult r : results) {
-
-            long timestamp=System.currentTimeMillis()/1000;
-            // Compute LCOMHS
-            lcomhs = LCOMHSCalculator.computeLcomhs(r.getM(), r.getF(), r.getSUMMF());   
-            records.add(new MetricRecord(r.getPackageName(), r.getClassName(), "LCOMHS", lcomhs, timestamp));       
-                System.out.println("File: " + file.getFileName());
-                System.out.println("Class: " + r.getClassName());
-                System.out.println("M (methods+ctors): " + r.getM());
-                System.out.println("F (instance fields): " + r.getF());
-                System.out.println("MF: " + r.getSUMMF());
-                System.out.printf("LCOMHS=%.6f%n", lcomhs);
-                System.out.println("----------------------------------");
+                System.out.println("[Main] LCOMHS scan complete. Metrics updated.");
+            } else {
+                System.out.println("[Main] No <path> arg provided. Skipping LCOMHS scan.");
             }
-        }
-        System.out.println("\n=== JSON Output ===");
-        System.out.println(MetricFormatter.toJson(records));
 
-        System.out.println("\n=== Prometheus Output ===");
-        System.out.println(MetricFormatter.toPrometheus(records));
+            // ----------------------------
+            // Taiga retrieval
+            // ----------------------------
+            String username = env("TAIGA_USERNAME");
+            String password = env("TAIGA_PASSWORD");
+            String slug = env("TAIGA_PROJECT_SLUG");
+            String sprintIndexStr = env("TAIGA_SPRINT_INDEX");
+            int sprintIndex = (sprintIndexStr == null) ? 0 : Integer.parseInt(sprintIndexStr);
+
+            if (username == null || password == null || slug == null) {
+                System.out.println("[Main] TAIGA configuration missing. Skipping Taiga.");
+            } else {
+
+                TaigaApiClient taiga = new TaigaApiClient();
+                taiga.login(username, password);
+
+                JsonNode project = taiga.getProjectBySlug(slug);
+                long projectId = project.get("id").asLong();
+
+                JsonNode sprints = taiga.getMilestones(projectId);
+
+                if (sprintIndex < 0 || sprintIndex >= sprints.size()) {
+                    throw new RuntimeException("TAIGA_SPRINT_INDEX out of range: " + sprintIndex);
+                }
+
+                long milestoneId = sprints.get(sprintIndex).get("id").asLong();
+                JsonNode milestone = taiga.getMilestone(milestoneId);
+
+                String sprintName = milestone.get("name").asText();
+                var points = TaktTimeCalculator.computeDaily(milestone);
+                int publishedCount = 0;
+                for (TaktTimeCalculator.TaktPoint p : points) {
+                    if (p.getDelivered() > 0) {
+
+                        double takt = p.getTaktTime();
+
+                        MetricsServer.TAKT_TIME_GAUGE
+                                .labels(sprintName, p.getDay().toString())
+                                .set(takt);
+
+
+                        publishedCount++;
+                    }
+                }
+
+                List<Integer> closedUserStoryIds = taiga.getClosedUserStoryIds();
+                Map<String, Integer> leadTimes = LeadTimeRetriever.getLeadTimeInfo(taiga, closedUserStoryIds); // TODO: Expose  in Task 50
+                leadTimes.forEach((name, time) -> {
+                    MetricsServer.LEAD_TIME_GAUGE.labels(name).set(time);
+                });
+            }
+            System.out.println("[Main] Running. Metrics available on :8080. Ctrl+C to stop.");
+            Thread.currentThread().join();
+
+        } catch (Exception e) {
+            System.out.println("[Main] FATAL ERROR:");
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }
