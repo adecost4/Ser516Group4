@@ -20,6 +20,7 @@ The team's quality is located [here](https://canvas.asu.edu/groups/754887/pages/
 
 ### Stage 2: Run using Docker Compose
 Run the following command:
+- docker compose down
 - docker compose up --build
 
 This will start:
@@ -71,6 +72,7 @@ Step 3: Verify Data Source
 Step 4: Import Dashboard
 1. Go to Dashboards -> New -> Import
 2. Import the JSON file located at the root(Github repo): LCOMHS_Metric_Dashboard.json
+3. Select prometheus for DS_PROMETHEUS value.
 - The dashboard will display three panels for LCOMHS, Takt Time, Lead Time.
 ## ----------------------------
 
@@ -86,7 +88,7 @@ Configurations(Already configured-no changes needed):
 - Script Path: Jenkinsfile
 
 Coverage Threshold
-- Current Threshold: 10% (To be improved in future)
+- Current Threshold: 40% (To be improved in future)
 
 Viewing Coverage Reports in Jenkins:
 1. Go to the Jenkins job.
