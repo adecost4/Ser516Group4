@@ -20,6 +20,7 @@ The team's quality is located [here](https://canvas.asu.edu/groups/754887/pages/
 
 ### Stage 2: Run using Docker Compose
 Run the following command:
+- docker compose down
 - docker compose up --build
 
 This will start:
