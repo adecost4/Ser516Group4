@@ -87,9 +87,6 @@ public class Main {
                                 .labels(sprintName, p.getDay().toString())
                                 .set(takt);
 
-                        System.out.println(" date=" + p.getDay()
-                                + " delivered=" + p.getDelivered()
-                                + " takt=" + takt);
 
                         publishedCount++;
                     }
